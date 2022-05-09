@@ -21,6 +21,28 @@ class Doggie:
 
 
     def fetch(self, tickers, timeframe, start, end):
+        """
+        This is a wrapper for the ALPACA api. 
+
+        INPUTS:
+        ------
+            tickers: a list of strings, representing tickers. 
+            timeframe: one of the following:
+                                "1D", 
+            start: the start date as a string. Ex. 2020-5-9
+            end:   the end date. see start for format.
+
+
+        USAGE:
+        -----
+            bone = lassie.fetch(
+                tickers = ["AAPL", "GOOG", "SPY"],
+                timeframe="1D",
+                start = "2020-5-9",
+                end = "2022-5-9"
+                )
+        
+        """
         if self.api == "alpaca":
 
             t_0 = pd.Timestamp(start, tz="America/New_York").isoformat()
@@ -35,6 +57,12 @@ class Doggie:
 
             return df_portfolio
 
+    # TODO: Research useful options to start implementing
+    # Perhaps request twits from the twitter api
+    # maybe there's a news aggregator that can be free.
+    def fetch_newspaper(self, tickers, src, start_date, end_date):
+        pass 
+
         
 
 
@@ -46,18 +74,4 @@ class Doggie:
 
 
 if __name__ == "__main__":
-    lassie = Doggie()
-
-    t_0 = "2020-07-14"
-    t = "2022-5-9"
-    tickers = ["FB", "TWTR", "AAPL","GOOG"]
-    timeframe = "1D"
-
-    bone = lassie.fetch(
-            tickers,
-            timeframe,
-            start = t_0,
-            end = t
-    )
-
-    print(bone)
+    pass 
