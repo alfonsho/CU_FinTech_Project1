@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 
 from doggie import Doggie
+import hvplot.pandas, hvplot
 
 
 
@@ -18,6 +19,8 @@ class Agent:
     def __init__(self, asset_DataFrame):
         self.data = asset_DataFrame
         self.tickers = asset_DataFrame['symbol'].unique()
+
+        self.keys = list(self.tickers) + ['risk', 'return']
 
 
     def attention(self):
@@ -49,19 +52,34 @@ class Agent:
             a 2 vector:
                 risk
                 return
+
+
         """
 
         cov = self.data.cov() * 252 #annualized
         risk = weights@cov@weights
         ret = self.data.mean(axis=0)*252@weights
 
-        metric = np.array([risk, ret])
 
-        return weights, metric
+        values = list(weights)
+        values.append(risk)
+        values.append(ret)
+
+
+        d = {}
+        for i, key in enumerate(self.keys):
+            d[key] = values[i]
+
+
+        s = pd.Series(d)
 
 
 
-    def random_portfolios(self, number_of_portfolios=10000):
+        return s
+
+
+
+    def random_portfolios(self, number_of_portfolios=1000):
         """
         creates N random possible portfolios of size M where M is the number of assets in the asset dataframe. 
 
@@ -73,18 +91,36 @@ class Agent:
 
         number_of_assets = len(self.tickers)
 
-        portfolios = []
+        portfolios = pd.DataFrame(columns=self.keys)
 
         for portfolio in range(number_of_portfolios):
 
             unnorm = np.random.uniform(0, 1, number_of_assets)
             weights = unnorm/unnorm.sum()
 
-            portfolios.append(self.F(weights))
+            portfolios = portfolios.append(self.F(weights), ignore_index=True)
 
 
-        return portfolios
+        self.portfolios = portfolios
 
+
+
+    def plot(self):
+        plot = self.portfolios.hvplot.scatter(  x='risk', 
+                                                y='return', 
+                                                grid=True,
+                                                hover_cols = list(self.portfolios.columns))
+        hvplot.show(plot)
+
+        
+
+    def there_is_no_spoon(self, display=True):
+        self.attention()
+        self.random_portfolios()
+        if display == True:
+            self.plot()
+
+        
 
 
 
@@ -120,16 +156,13 @@ if __name__ == "__main__":
     tank = Doggie()
 
     lady_in_red = tank.fetch(
-                tickers = ["AAPL", "GOOG", "SPY"],
+                tickers = ["AAPL", "MSFT", "GLD"],
                 timeframe="1D",
-                start = "2020-5-9",
+                start = "2015-5-9",
                 end = "2022-5-9"
                 )
 
     neo = Agent(lady_in_red)
-
-    neo.attention()
-    for p in neo.random_portfolios(400):
-        print(f"Weights: {p[0]}\n\trisk/return: {p[1]}\n")
+    neo.there_is_no_spoon()
 
 
