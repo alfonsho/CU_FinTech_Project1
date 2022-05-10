@@ -109,7 +109,8 @@ class Agent:
         plot = self.portfolios.hvplot.scatter(  x='risk', 
                                                 y='return', 
                                                 grid=True,
-                                                hover_cols = list(self.portfolios.columns))
+                                                hover_cols = list(self.portfolios.columns),
+                                                title=" + ".join(self.tickers))
         hvplot.show(plot)
 
         
@@ -156,7 +157,7 @@ if __name__ == "__main__":
     tank = Doggie()
 
     lady_in_red = tank.fetch(
-                tickers = ["AAPL", "MSFT", "GLD"],
+                tickers = ["ARE", "TSLA", "MSFT", "GLD", "LLY", "PFE", "WMT"],
                 timeframe="1D",
                 start = "2015-5-9",
                 end = "2022-5-9"
