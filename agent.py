@@ -1,15 +1,94 @@
-from re import S
+
 import pandas as pd
 import numpy as np
+
+from doggie import Doggie
 
 
 
 class Agent:
+    '''
+    3 fundamental general principles for agents. 
+        - Attention: gets the data into usable form
+        - Intention: minimize error, maximize utility, etc
+        - Cognition: runs a particular process to find the action(s) with the belief it will maximize intention.
+        - Action: returns optimal action(s)
+    '''
 
     def __init__(self, asset_DataFrame):
-        pass
+        self.data = asset_DataFrame
+        self.tickers = asset_DataFrame['symbol'].unique()
 
-    # def 
+
+    def attention(self):
+        """
+            get the asset_DataFrame from its raw state 
+                currently an alpaca timestamp|open|high|low|close|volume|trade_count|vwap|symbol
+            into a desired state
+                in this case I want 
+                timestamp|ticker|
+
+        """
+        closes = []
+        for ticker in self.tickers:
+            closes.append(self.data[self.data["symbol"]==ticker]['close'])
+
+        closes = pd.concat(closes, axis=1)
+        self.data = closes.pct_change()
+        self.data.columns = self.tickers
+
+
+    def F(self, weights):
+        """
+        Inputs: 
+        ------  
+            weights: portfolio weights. 
+
+        Outputs:
+        -------
+            a 2 vector:
+                risk
+                return
+        """
+
+        cov = self.data.cov() * 252 #annualized
+        risk = weights@cov@weights
+        ret = self.data.mean(axis=0)*252@weights
+
+        metric = np.array([risk, ret])
+
+        return weights, metric
+
+
+
+    def random_portfolios(self, number_of_portfolios=10000):
+        """
+        creates N random possible portfolios of size M where M is the number of assets in the asset dataframe. 
+
+        returns a matrix where 
+
+                the rows are portfolios, the columns are allocations for asset i 
+        """
+
+
+        number_of_assets = len(self.tickers)
+
+        portfolios = []
+
+        for portfolio in range(number_of_portfolios):
+
+            unnorm = np.random.uniform(0, 1, number_of_assets)
+            weights = unnorm/unnorm.sum()
+
+            portfolios.append(self.F(weights))
+
+
+        return portfolios
+
+
+
+
+
 
     def __doc__(cls):
         s = """
@@ -37,6 +116,20 @@ class Agent:
 
 
 if __name__ == "__main__":
-    neo = Agent(2)
-    Agent.__doc__(2)
+
+    tank = Doggie()
+
+    lady_in_red = tank.fetch(
+                tickers = ["AAPL", "GOOG", "SPY"],
+                timeframe="1D",
+                start = "2020-5-9",
+                end = "2022-5-9"
+                )
+
+    neo = Agent(lady_in_red)
+
+    neo.attention()
+    for p in neo.random_portfolios(400):
+        print(f"Weights: {p[0]}\n\trisk/return: {p[1]}\n")
+
 

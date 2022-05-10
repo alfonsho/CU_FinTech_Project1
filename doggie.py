@@ -58,8 +58,8 @@ class Doggie:
             return df_portfolio
 
     # TODO: Research useful options to start implementing
-    # Perhaps request twits from the twitter api
-    # maybe there's a news aggregator that can be free.
+    # Perhaps request tweets from the twitter api
+    # maybe there's a convenient news aggregator.
     def fetch_newspaper(self, tickers, src, start_date, end_date):
         pass 
 
