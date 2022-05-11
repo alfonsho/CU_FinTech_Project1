@@ -1,4 +1,5 @@
 
+from dis import dis
 import pandas as pd
 import numpy as np
 
@@ -56,6 +57,7 @@ class Agent:
 
         """
 
+
         cov = self.data.cov() * 252 #annualized
         risk = weights@cov@weights
         ret = self.data.mean(axis=0)*252@weights
@@ -79,7 +81,7 @@ class Agent:
 
 
 
-    def random_portfolios(self, number_of_portfolios=1000):
+    def random_portfolios(self, number_of_portfolios=10000):
         """
         creates N random possible portfolios of size M where M is the number of assets in the asset dataframe. 
 
@@ -93,15 +95,23 @@ class Agent:
 
         portfolios = pd.DataFrame(columns=self.keys)
 
+
         for portfolio in range(number_of_portfolios):
 
             unnorm = np.random.uniform(0, 1, number_of_assets)
-            weights = unnorm/unnorm.sum()
+            weights = unnorm/(unnorm.sum())
+            
 
-            portfolios = portfolios.append(self.F(weights), ignore_index=True)
-
+            
+            if weights.sum() <= 1:    
+                portfolios = portfolios.append(self.F(weights), ignore_index=True)
 
         self.portfolios = portfolios
+
+
+    def r(self, risk, epsilon=0.005):
+        rng = self.portfolios[(self.portfolios['risk'] > risk - epsilon) & (self.portfolios['risk'] < risk + epsilon)]
+        return rng
 
 
 
@@ -164,6 +174,14 @@ if __name__ == "__main__":
                 )
 
     neo = Agent(lady_in_red)
-    neo.there_is_no_spoon()
+
+    neo.there_is_no_spoon(display = False)
+    
+    degenerate = neo.portfolios[neo.portfolios[neo.tickers].sum(axis=1) > 1]
+    print(degenerate)
+
+
+
+
 
 
