@@ -23,6 +23,8 @@ class Agent:
 
         self.keys = list(self.tickers) + ['risk', 'return']
 
+        
+
 
     def attention(self):
         """
@@ -41,6 +43,8 @@ class Agent:
         self.data = closes.pct_change()
         self.data.columns = self.tickers
 
+        self.cov = self.data.cov() * 252
+
 
     def F(self, weights):
         """
@@ -58,8 +62,8 @@ class Agent:
         """
 
 
-        cov = self.data.cov() * 252 #annualized
-        risk = weights@cov@weights
+
+        risk = weights@self.cov@weights
         ret = self.data.mean(axis=0)*252@weights
 
 
@@ -95,16 +99,12 @@ class Agent:
 
         portfolios = pd.DataFrame(columns=self.keys)
 
+        candidates = np.random.uniform(0, 1, (number_of_portfolios, number_of_assets))
+        normalized = (candidates.T / candidates.sum(axis=1)).T
 
-        for portfolio in range(number_of_portfolios):
-
-            unnorm = np.random.uniform(0, 1, number_of_assets)
-            weights = unnorm/(unnorm.sum())
-            
-
-            
-            if weights.sum() <= 1:    
-                portfolios = portfolios.append(self.F(weights), ignore_index=True)
+        for portfolio in normalized:
+   
+            portfolios = portfolios.append(self.F(portfolio), ignore_index=True)
 
         self.portfolios = portfolios
 
@@ -175,10 +175,8 @@ if __name__ == "__main__":
 
     neo = Agent(lady_in_red)
 
-    neo.there_is_no_spoon(display = False)
+    neo.there_is_no_spoon(display = True)
     
-    degenerate = neo.portfolios[neo.portfolios[neo.tickers].sum(axis=1) > 1]
-    print(degenerate)
 
 
 
