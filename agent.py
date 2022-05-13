@@ -1,5 +1,5 @@
-
-from dis import dis
+import sys
+# from dis import dis
 import pandas as pd
 import numpy as np
 
@@ -62,10 +62,8 @@ class Agent:
         """
 
 
-
         risk = weights@self.cov@weights
         ret = self.data.mean(axis=0)*252@weights
-
 
         values = list(weights)
         values.append(risk)
@@ -85,7 +83,7 @@ class Agent:
 
 
 
-    def random_portfolios(self, number_of_portfolios=10000):
+    def random_portfolios(self, number_of_portfolios=1000):
         """
         creates N random possible portfolios of size M where M is the number of assets in the asset dataframe. 
 
@@ -106,6 +104,7 @@ class Agent:
    
             portfolios = portfolios.append(self.F(portfolio), ignore_index=True)
 
+        portfolios.drop(portfolios[(portfolios[self.tickers].sum(axis=1) > 1)].index, inplace=True)
         self.portfolios = portfolios
 
 
@@ -115,7 +114,7 @@ class Agent:
 
 
 
-    def plot(self):
+    def plot(self, save=True):
         plot = self.portfolios.hvplot.scatter(  x='risk', 
                                                 y='return', 
                                                 grid=True,
@@ -123,41 +122,37 @@ class Agent:
                                                 title=" + ".join(self.tickers))
         hvplot.show(plot)
 
+        if save == True:
+
+            filename = './resources/' + '+'.join(self.tickers) + ".html"
+            hvplot.save(plot, filename=filename)
+
         
 
     def there_is_no_spoon(self, display=True):
         self.attention()
         self.random_portfolios()
         if display == True:
-            self.plot()
-
-        
+            self.plot(save=True)
 
 
 
-
-
-    def __doc__(cls):
-        s = """
-        This particular agent will receive a collection 
-        of n assets in a pandas time-series DataFrame. 
-        
-        it generates M portfolios of random allocations
-        of the assets in said portfolio. 
-
-        places them in risk-return space. 
-
-        plots them. 
-
-        Given desired return, chooses portfolio with
-        closest return with the least risk.
-
-        Given desired risk, chooses portfolio with the 
-        max return, given 
-
+    def oracle(self):
         """
+        simulates performs simulation based on the found portfolios. 
+        
+        """
+        pass
 
-        return s
+
+
+
+
+
+
+        
+
+
 
 
 
@@ -169,13 +164,19 @@ if __name__ == "__main__":
     lady_in_red = tank.fetch(
                 tickers = ["ARE", "TSLA", "MSFT", "GLD", "LLY", "PFE", "WMT"],
                 timeframe="1D",
-                start = "2015-5-9",
-                end = "2022-5-9"
+                start = "2017-5-9",
+                end = "2022-5-13"
                 )
 
     neo = Agent(lady_in_red)
 
     neo.there_is_no_spoon(display = True)
+
+    # print(sys.argv)
+
+
+    
+
     
 
 
