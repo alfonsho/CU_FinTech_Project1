@@ -22,6 +22,11 @@ class Agent:
     '''
 
     def __init__(self, asset_DataFrame):
+        ## I know... this is dirty... change it into something cleaner
+        # Problem description: self.data is modified by the self.attention method
+        # which then is used by the rest of the class. I could rewrite all of that
+        # or just endure this short code fart. 
+        self.asset_DataFrame = asset_DataFrame
         self.data = asset_DataFrame
         self.tickers = asset_DataFrame['symbol'].unique()
 
@@ -160,12 +165,39 @@ class Agent:
 
 
 
-    def oracle(self):
+    def oracle(self, risk=None):
         """
         simulates performs simulation based on the found portfolios. 
         
         """
-        pass
+
+        if risk == "low":
+            # TODO
+            pass
+
+        elif risk == "med":
+            # TODO
+            pass
+
+        elif risk == "high":
+            # TODO 
+            pass
+
+        elif risk == None:
+            risk = ""
+
+        separate = [self.asset_DataFrame[self.asset_DataFrame['symbol'] == symbol] for symbol in self.asset_DataFrame['symbol'].unique()]
+        data = pd.concat(separate, axis=1,join="inner", keys = self.asset_DataFrame['symbol'].unique())
+
+        sim = MCSimulation(portfolio_data=data,
+                            weights=risk,
+                            num_simulation=1000,
+                            num_trading_days=252*3
+                            )
+
+        sim.calc_cumulative_return()
+
+        self.simulation = sim
 
 
 
@@ -188,13 +220,6 @@ if __name__ == "__main__":
         print(sys.argv)
 
 
-    """ARE           0.100969
-    GLD           0.140147
-    LLY           0.041370
-    MSFT          0.144150
-    PFE           0.055741
-    TSLA          0.480805
-    WMT           0.036818"""
 
 
 
@@ -213,34 +238,15 @@ if __name__ == "__main__":
                 end = "2022-5-13"
                 )
 
-    print(lady_in_red)
 
-    separate = [lady_in_red[lady_in_red['symbol'] == symbol] for symbol in lady_in_red['symbol'].unique()]
-    data = pd.concat(separate, axis=1,join="inner", keys = lady_in_red['symbol'].unique())
+    neo = Agent(lady_in_red)
 
+    neo.oracle()
+    neo.simulation.plot_simulation()
 
-    sim = MCSimulation( portfolio_data = data,
-                weights=[0.100969,
-                0.140147,
-                0.041370,
-                0.144150,
-                0.055741,
-                0.480805,
-                0.036818
-                        ],
-                num_simulation=1000,
-                    num_trading_days=252*3
-    )
+    neo.there_is_no_spoon(plot='save')
 
-    sim.calc_cumulative_return()
-
-    sim.plot_simulation()
-
-    # neo = Agent(lady_in_red)
-
-    # neo.there_is_no_spoon(plot='show')
-
-    # print(sys.argv)
+    print(sys.argv)
 
 
     
