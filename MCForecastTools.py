@@ -92,7 +92,18 @@ class MCSimulation:
         # Initialize empty Dataframe to hold simulated prices
         portfolio_cumulative_returns = pd.DataFrame()
 
-        messages = """I'm imagining the future\tLOOK, A HORRIBLE MESSAGE YOU'LL IGNORE: \tNOW BE vewy\tvewy\tquiet.\tA bit of patience.\tThe cake is a lie.\tAt Aperture Industries, we eat Umbrella Inc. Yoghurt.\tThey say it's made of zombies, \tWe believe it. \tit's so good, we don't care.""".split('\t')
+        messages = ["There's a horrible message coming right up. Ready?",
+                    "\n", 
+                    "...Told ya",
+                    "don't fret. I'm still thinking",
+                    "... *awkwardly hums*...",
+                    "any minute now",
+                    "You are now aware of your tongue",
+                    "and the soles of your feet",
+                    "and now you're aware of your breathing.",
+                    "The cake is a lie"
+        
+        ]
 
         msg = 0
         
