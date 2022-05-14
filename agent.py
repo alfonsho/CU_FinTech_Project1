@@ -6,6 +6,10 @@ import numpy as np
 from doggie import Doggie
 import hvplot.pandas, hvplot
 
+from MCForecastTools import MCSimulation
+
+
+
 
 
 class Agent:
@@ -62,7 +66,8 @@ class Agent:
         """
 
 
-        risk = weights@self.cov@weights
+        risk = weights@self.cov@weights #* 252 /100
+
         ret = self.data.mean(axis=0)*252@weights
 
         values = list(weights)
@@ -114,7 +119,7 @@ class Agent:
 
 
 
-    def plot(self, save=True):
+    def display_plot(self, ):
         plot = self.portfolios.hvplot.scatter(  x='risk', 
                                                 y='return', 
                                                 grid=True,
@@ -122,18 +127,36 @@ class Agent:
                                                 title=" + ".join(self.tickers))
         hvplot.show(plot)
 
-        if save == True:
 
-            filename = './resources/' + '+'.join(self.tickers) + ".html"
-            hvplot.save(plot, filename=filename)
 
-        
 
-    def there_is_no_spoon(self, display=True):
+    def save_plot(self):
+        plot = self.portfolios.hvplot.scatter(  x='risk', 
+                                                y='return', 
+                                                grid=True,
+                                                hover_cols = list(self.portfolios.columns),
+                                                title=" + ".join(self.tickers))
+
+
+        filename = './resources/' + '+'.join(self.tickers) + ".html"
+
+        hvplot.save(plot, filename=filename)
+
+
+
+    def there_is_no_spoon(self, plot='save'):
+
+
         self.attention()
         self.random_portfolios()
-        if display == True:
-            self.plot(save=True)
+
+
+        if plot == "show":
+            self.display_plot()
+
+        elif plot == "save":
+            self.save_plot()
+
 
 
 
@@ -159,18 +182,63 @@ class Agent:
 
 if __name__ == "__main__":
 
+
+    if len(sys.argv)>1:
+        
+        print(sys.argv)
+
+
+    """ARE           0.100969
+    GLD           0.140147
+    LLY           0.041370
+    MSFT          0.144150
+    PFE           0.055741
+    TSLA          0.480805
+    WMT           0.036818"""
+
+
+
     tank = Doggie()
 
     lady_in_red = tank.fetch(
-                tickers = ["ARE", "TSLA", "MSFT", "GLD", "LLY", "PFE", "WMT"],
+                tickers = ["ARE", 
+                            "GLD", 
+                            "LLY", 
+                            "MSFT", 
+                            "PFE", 
+                            'TSLA', 
+                            'WMT'],
                 timeframe="1D",
                 start = "2017-5-9",
                 end = "2022-5-13"
                 )
 
-    neo = Agent(lady_in_red)
+    print(lady_in_red)
 
-    neo.there_is_no_spoon(display = True)
+    separate = [lady_in_red[lady_in_red['symbol'] == symbol] for symbol in lady_in_red['symbol'].unique()]
+    data = pd.concat(separate, axis=1,join="inner", keys = lady_in_red['symbol'].unique())
+
+
+    sim = MCSimulation( portfolio_data = data,
+                weights=[0.100969,
+                0.140147,
+                0.041370,
+                0.144150,
+                0.055741,
+                0.480805,
+                0.036818
+                        ],
+                num_simulation=1000,
+                    num_trading_days=252*3
+    )
+
+    sim.calc_cumulative_return()
+
+    sim.plot_simulation()
+
+    # neo = Agent(lady_in_red)
+
+    # neo.there_is_no_spoon(plot='show')
 
     # print(sys.argv)
 
