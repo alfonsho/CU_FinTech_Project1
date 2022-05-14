@@ -1,3 +1,4 @@
+import argparse
 import sys
 # from dis import dis
 import pandas as pd
@@ -162,6 +163,9 @@ class Agent:
         elif plot == "save":
             self.save_plot()
 
+
+
+
     def select_portfolio_by_risk(self, level=0, as_list=False):
         lower = self.portfolios['risk'].min()
         upper = self.portfolios['risk'].max()
@@ -170,7 +174,11 @@ class Agent:
 
         # TODO: rewrite the following fart. It works. it's just smelly. 
         candidate = self.portfolios[np.isclose(self.portfolios['risk'], steps[level], rtol=steps[1]-steps[0])].sort_values('return').iloc[-1]
-        
+
+
+        # TODO: Rewrite to include when the user inputs no risk. in other words
+        # allow the user to query the evenly distributed portfolio. The rest of the code runs fine
+        # it's just this function which decides to use the level 0 portfolio instead of the evenly one. 
         self.portfolio = candidate
 
         if as_list == True:
@@ -196,7 +204,8 @@ class Agent:
         elif risk == "high":
             risk = self.select_portfolio_by_risk(level=2, as_list=True)
 
-        elif risk == None:
+        elif risk == None or risk == '':
+            self.select_portfolio_by_risk(level=0)
             risk = ""
 
         separate = [self.asset_DataFrame[self.asset_DataFrame['symbol'] == symbol] for symbol in self.asset_DataFrame['symbol'].unique()]
@@ -250,10 +259,47 @@ def run(tickers, budget=100000, risk=None):
     neo = Agent(lady_in_red)
     neo.there_is_no_spoon(plot='save')
 
-    neo.oracle(risk='high')
+    neo.oracle(risk=risk)
     neo.simulation.plot_simulation()
 
     neo.budget_allocation(budget, to_csv=True)
+
+
+def parse_argv(argv):
+
+
+
+    d = {}
+
+    for arg in argv:
+        if "-tickers" in arg:
+            payload = arg.split("=")[1]
+            if "," in payload:
+                d['tickers'] = arg.split("=")[1].split(',')
+            else:
+                d['tickers'] = [payload]
+
+        if "-risk" in arg:
+            payload = arg.split("=")[1]
+            if payload.isnumeric():
+                d['risk'] = int(payload)
+            elif type(payload) == str or payload is None:
+                d['risk'] = payload
+        
+        elif "-risk" not in arg:
+            d['risk'] = None
+
+        if "-budget" in arg:
+            d['budget'] = int(arg)
+
+        elif '-budget' not in arg:
+            d['budget'] = 100000
+
+    
+
+    return d
+
+
 
 
 
@@ -271,41 +317,21 @@ if __name__ == "__main__":
 
 
     if len(sys.argv) < 2:
-        help = """
-        EXAMPLE USAGE: 
-            From the command line type:
-
-                % python agent.py --run -tickers=AAPL,MSFT,GLD,PFE,TSLA,WMT -risk=high
-
-            tickers take any tickers in that format. 
-
-            risk can be "low", "med", "high" or simply not provided. 
-
-        OUTPUT:
-        ------
-            It will generate 3 files to the resources folder. 
-                
-                - risk return characteristics for the portfolio as an HTML interactive plot. 
-                - A plot of a Monte Carlo simulation of the provided assets according to the risk provided
-                - A CSV of the selected portfolio allocation valued in USD according to the budget given. 
-
-            if No risk level is provided, the code will run a Monte Carlo with even weights. 
         
-        """
+        with open("readme.txt", 'r') as f:
+            help = f.read()
+
         print(help)
 
+    
+
 
         
-        print(sys.argv)
+    d = parse_argv(sys.argv)
+
+    run(budget=d['budget'], risk=d['risk'], tickers=d['tickers'])
 
 
-    tickers = ["ARE", 
-                            "GLD", 
-                            "LLY", 
-                            "MSFT", 
-                            "PFE", 
-                            'TSLA', 
-                            'WMT']
 
     # run(tickers, budget, risk)
 
