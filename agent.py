@@ -291,7 +291,7 @@ def parse_argv(argv):
 
         if "-budget" in arg:
             payload = arg.split("=")[1]
-            d['budget'] = int(payload)
+            d['budget'] = float(payload)
 
         elif '-budget' not in arg:
             d['budget'] = 100000
