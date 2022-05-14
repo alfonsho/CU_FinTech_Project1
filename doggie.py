@@ -67,6 +67,23 @@ class Doggie:
 
 
 
+
+    def keep(self):
+        """
+            @Anusha, I'd put your code here. 
+            I've noticed that there are some variables in your code
+            that are not present in mine and thus it needs some scaffolding. 
+
+            Be mindful that I didn't write test cases and therefore debugging 
+            git branches are friends. 
+
+        """
+        pass
+
+
+
+
+
     
 
     def __doc__(cls):
@@ -74,4 +91,15 @@ class Doggie:
 
 
 if __name__ == "__main__":
-    pass 
+
+    lassie = Doggie()
+    
+    data = lassie.fetch(tickers=["TSLA", "AAPL", "MSFT", "ARE"],
+    timeframe="1D",
+    start="2020-05-10",
+    end="2022-05-10",
+    )
+
+    # lassie.keep()
+
+    print(data)

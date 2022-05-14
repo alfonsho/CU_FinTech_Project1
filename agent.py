@@ -290,7 +290,8 @@ def parse_argv(argv):
             d['risk'] = None
 
         if "-budget" in arg:
-            d['budget'] = int(arg)
+            payload = arg.split("=")[1]
+            d['budget'] = int(payload)
 
         elif '-budget' not in arg:
             d['budget'] = 100000
@@ -322,14 +323,11 @@ if __name__ == "__main__":
             help = f.read()
 
         print(help)
-
-    
-
-
+    else:
         
-    d = parse_argv(sys.argv)
+        d = parse_argv(sys.argv)
 
-    run(budget=d['budget'], risk=d['risk'], tickers=d['tickers'])
+        run(budget=d['budget'], risk=d['risk'], tickers=d['tickers'])
 
 
 
