@@ -162,7 +162,23 @@ class Agent:
         elif plot == "save":
             self.save_plot()
 
+    def select_portfolio_by_risk(self, level=0, as_list=False):
+        lower = self.portfolios['risk'].min()
+        upper = self.portfolios['risk'].max()
 
+        steps = np.linspace(lower, upper, 3)
+
+        # TODO: rewrite the following fart. It works. it's just smelly. 
+        candidate = self.portfolios[np.isclose(self.portfolios['risk'], steps[level], rtol=steps[1]-steps[0])].sort_values('return').iloc[-1]
+        
+        self.portfolio = candidate
+
+        if as_list == True:
+            return list(candidate[self.tickers])
+
+        
+        
+        return candidate
 
 
     def oracle(self, risk=None):
@@ -172,16 +188,13 @@ class Agent:
         """
 
         if risk == "low":
-            # TODO
-            pass
+            risk = self.select_portfolio_by_risk(level=0, as_list=True)
 
         elif risk == "med":
-            # TODO
-            pass
+            risk = self.select_portfolio_by_risk(level=1, as_list=True)
 
         elif risk == "high":
-            # TODO 
-            pass
+            risk = self.select_portfolio_by_risk(level=2, as_list=True)
 
         elif risk == None:
             risk = ""
@@ -198,6 +211,18 @@ class Agent:
         sim.calc_cumulative_return()
 
         self.simulation = sim
+
+
+    def budget_allocation(self, budget, to_csv=False):
+        "requires the existence of self.portfolio. "
+
+        budget_allocation = self.portfolio*budget
+
+        if to_csv==True:
+            budget_allocation.to_csv("./resources/budget_allocation.csv")
+
+        return budget_allocation
+
 
 
 
@@ -240,11 +265,14 @@ if __name__ == "__main__":
 
 
     neo = Agent(lady_in_red)
+    neo.there_is_no_spoon(plot='save')
 
-    neo.oracle()
+    neo.oracle(risk='high')
     neo.simulation.plot_simulation()
 
-    neo.there_is_no_spoon(plot='save')
+    neo.budget_allocation(100000, to_csv=True)
+
+    
 
     print(sys.argv)
 

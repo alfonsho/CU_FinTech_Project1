@@ -91,12 +91,17 @@ class MCSimulation:
         
         # Initialize empty Dataframe to hold simulated prices
         portfolio_cumulative_returns = pd.DataFrame()
+
+        messages = """I'm imagining the future\tLOOK, A HORRIBLE MESSAGE YOU'LL IGNORE: \tNOW BE vewy\tvewy\tquiet.\tA bit of patience.\tThe cake is a lie.\tAt Aperture Industries, we eat Umbrella Inc. Yoghurt.\tThey say it's made of zombies, \tWe believe it. \tit's so good, we don't care.""".split('\t')
+
+        msg = 0
         
         # Run the simulation of projecting stock prices 'nSim' number of times
         for n in range(self.nSim):
         
-            if n % 10 == 0:
-                print(f"Running Monte Carlo simulation number {n}.")
+            if n % 100 == 0:
+                print(f"{messages[msg]}\t({n}).")
+                msg += 1
         
             # Create a list of lists to contain the simulated values for each stock
             simvals = [[p] for p in last_prices]
