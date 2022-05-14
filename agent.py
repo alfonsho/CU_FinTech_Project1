@@ -229,6 +229,36 @@ class Agent:
 
 
 
+def run(tickers, budget=100000, risk=None):
+    """
+    generates a payload in resources. 
+    """
+
+    tank = Doggie()
+
+    start = str(pd.Timestamp.now())[:10]
+    end = str(pd.Timestamp.now() - pd.Timedelta(365*5, 'days'))[:10]
+
+    lady_in_red = tank.fetch(
+    tickers = tickers,
+            timeframe="1D",
+            start = "2017-5-9",
+            end = "2022-5-13"
+            )
+
+
+    neo = Agent(lady_in_red)
+    neo.there_is_no_spoon(plot='save')
+
+    neo.oracle(risk='high')
+    neo.simulation.plot_simulation()
+
+    neo.budget_allocation(budget, to_csv=True)
+
+
+
+
+
 
         
 
@@ -240,41 +270,58 @@ class Agent:
 if __name__ == "__main__":
 
 
-    if len(sys.argv)>1:
+    if len(sys.argv) < 2:
+        help = """
+        EXAMPLE USAGE: 
+            From the command line type:
+
+                % python agent.py --run -tickers=AAPL,MSFT,GLD,PFE,TSLA,WMT -risk=high
+
+            tickers take any tickers in that format. 
+
+            risk can be "low", "med", "high" or simply not provided. 
+
+        OUTPUT:
+        ------
+            It will generate 3 files to the resources folder. 
+                
+                - risk return characteristics for the portfolio as an HTML interactive plot. 
+                - A plot of a Monte Carlo simulation of the provided assets according to the risk provided
+                - A CSV of the selected portfolio allocation valued in USD according to the budget given. 
+
+            if No risk level is provided, the code will run a Monte Carlo with even weights. 
+        
+        """
+        print(help)
+
+
         
         print(sys.argv)
 
 
-
-
-
-    tank = Doggie()
-
-    lady_in_red = tank.fetch(
-                tickers = ["ARE", 
+    tickers = ["ARE", 
                             "GLD", 
                             "LLY", 
                             "MSFT", 
                             "PFE", 
                             'TSLA', 
-                            'WMT'],
-                timeframe="1D",
-                start = "2017-5-9",
-                end = "2022-5-13"
-                )
+                            'WMT']
+
+    # run(tickers, budget, risk)
 
 
-    neo = Agent(lady_in_red)
-    neo.there_is_no_spoon(plot='save')
 
-    neo.oracle(risk='high')
-    neo.simulation.plot_simulation()
 
-    neo.budget_allocation(100000, to_csv=True)
 
-    
 
-    print(sys.argv)
+
+
+
+
+
+
+
+
 
 
     
