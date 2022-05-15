@@ -1,5 +1,8 @@
+from tkinter import Y
 import numpy as np
 import pandas as pd
+import hvplot.pandas
+import hvplot
 
 from doggie import Doggie
 
@@ -15,6 +18,7 @@ class efficientFrontier:
             self.get_data()
             self.attention() # wrangles data so it can be processed. 
             self.calculate_metrics() # calculates statistical metrics like covariance and correlation. 
+            self.generate_random_portfolios()
 
 
     def __repr__(self,):
@@ -110,17 +114,26 @@ class efficientFrontier:
 
         self.portfolios = pd.DataFrame(normalized_portfolios, columns=self.tickers)
 
-        # Vectorized Calculation of portfolio variance! F yeah!. it is annualized btw. 
-        self.portfolios['variance'] = np.sqrt(self.portfolios.apply(lambda w: w.T@self.cov@w, axis=1)) * np.sqrt(250)
+        # Vectorized Calculation of portfolio volatility! F yeah!. it is annualized standard deviation.
+        self.portfolios['volatility'] = np.sqrt(self.portfolios.apply(lambda w: w.T@self.cov@w, axis=1)) * np.sqrt(250)
 
         # Return
         self.portfolios['return'] = self.portfolios[self.tickers].apply(lambda w: w@self.annualized_individual_expected_return, axis=1)
 
+        #SHARPE
+        self.portfolios['sharpe_ratio'] = self.portfolios['return'] / self.portfolios['volatility']
 
+        self.portfolios.sort_values('sharpe_ratio', inplace=True)
         return self.portfolios
 
 
-
+    def display_plot(self, ):
+        plot = self.portfolios.hvplot.scatter(  x='volatility', 
+                                                y='return', 
+                                                grid=True,
+                                                hover_cols = list(self.portfolios.columns),
+                                                title=" + ".join(self.tickers))
+        hvplot.show(plot)
 
         
 
@@ -134,17 +147,14 @@ class efficientFrontier:
 
 if __name__ == "__main__":
 
-    neo = efficientFrontier(tickers=['NKE', 'GOOGL', 'ARE', 'GLD', 'PFE', 'MSFT'])
+
+
+    neo = efficientFrontier(tickers=['MSFT', 'TSLA', 'AAPL', 'GLD', 'PFE'])
 
     neo.generate_random_portfolios()
 
     # this is annualized covariance. 
-    # print(np.sqrt(neo.cov*250))
-
-    
-
-    neo.portfolios['sharpe_ratio'] = neo.portfolios['return'] / neo.portfolios['variance']
-
-    print(neo.portfolios.sort_values('sharpe_ratio'))
-
     print(neo.annualized_individual_expected_return)
+
+    neo.display_plot()
+    # neo.display_plot()
