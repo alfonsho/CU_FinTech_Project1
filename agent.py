@@ -9,6 +9,9 @@ import hvplot.pandas, hvplot
 
 from MCForecastTools import MCSimulation
 
+import warnings
+warnings.simplefilter(action="ignore")
+
 
 
 
