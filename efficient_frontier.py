@@ -13,7 +13,8 @@ class efficientFrontier:
         self.tickers = tickers
         if self.tickers is not None:
             self.get_data()
-            self.attention()
+            self.attention() # wrangles data so it can be processed. 
+            self.calculate_metrics() # calculates statistical metrics like covariance and correlation. 
 
 
     def __repr__(self,):
@@ -68,6 +69,8 @@ class efficientFrontier:
         relevants = pd.concat(relevants, axis=1)
         relevants.columns = self.tickers
 
+        self.annualized_individual_expected_return = relevants.resample('Y').last().pct_change().mean()
+
         if overwrite_data == True:
             if method == "log_returns":
                 self.data = relevants.pct_change().apply(lambda x: np.log(1+x))
@@ -75,8 +78,22 @@ class efficientFrontier:
             return relevants
 
 
+    def calculate_covariance_matrix(self):
+        """
+        
+        """
+        self.cov = self.data.cov()
 
-    def generate_random_portfolios(self, number_of_portfolios = 5000):
+    def calculate_correlation_matrix(self):
+        self.corr = self.data.corr()
+
+
+    def calculate_metrics(self,):
+        self.calculate_covariance_matrix()
+        self.calculate_correlation_matrix()
+
+
+    def generate_random_portfolios(self, number_of_portfolios = 10000):
         """
             generates random portfolios
         """
@@ -92,6 +109,13 @@ class efficientFrontier:
         normalized_portfolios = portfolios / sum_of_rows[:, np.newaxis]
 
         self.portfolios = pd.DataFrame(normalized_portfolios, columns=self.tickers)
+
+        # Vectorized Calculation of portfolio variance! F yeah!. it is annualized btw. 
+        self.portfolios['variance'] = np.sqrt(self.portfolios.apply(lambda w: w.T@self.cov@w, axis=1)) * np.sqrt(250)
+
+        # Return
+        self.portfolios['return'] = self.portfolios[self.tickers].apply(lambda w: w@self.annualized_individual_expected_return, axis=1)
+
 
         return self.portfolios
 
@@ -110,9 +134,17 @@ class efficientFrontier:
 
 if __name__ == "__main__":
 
-    neo = efficientFrontier(tickers=['AAPL', 'TSLA', 'MSFT', 'ARE'])
+    neo = efficientFrontier(tickers=['NKE', 'GOOGL', 'ARE', 'GLD', 'PFE', 'MSFT'])
 
-    data = neo.data
+    neo.generate_random_portfolios()
 
+    # this is annualized covariance. 
+    # print(np.sqrt(neo.cov*250))
 
-    print(data)
+    
+
+    neo.portfolios['sharpe_ratio'] = neo.portfolios['return'] / neo.portfolios['variance']
+
+    print(neo.portfolios.sort_values('sharpe_ratio'))
+
+    print(neo.annualized_individual_expected_return)
