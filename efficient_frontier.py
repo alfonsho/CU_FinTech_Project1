@@ -74,6 +74,7 @@ class efficientFrontier:
         relevants.columns = self.tickers
 
         self.annualized_individual_expected_return = relevants.resample('Y').last().pct_change().mean()
+        # self.annualized_individual_expected_return = relevants.pct_change().mean() * 250
 
         if overwrite_data == True:
             if method == "log_returns":
