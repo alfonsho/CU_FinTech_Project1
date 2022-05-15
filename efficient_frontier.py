@@ -13,6 +13,7 @@ class efficientFrontier:
         self.tickers = tickers
         if self.tickers is not None:
             self.get_data()
+            self.attention()
 
 
     def __repr__(self,):
@@ -50,9 +51,13 @@ class efficientFrontier:
 
 
 
-    def attention(self, column="close"):
+    def attention(self, column="close", overwrite_data=True, method="log_returns"):
         """
         all the data fetched, wrangle it so it only gets the desired attributes per ticker. 
+
+        This instance modifies the self.data from the raw alpaca to the log returns on the close price
+        for the portfolios. 
+
         """
 
         relevants = []
@@ -63,7 +68,12 @@ class efficientFrontier:
         relevants = pd.concat(relevants, axis=1)
         relevants.columns = self.tickers
 
-        print(relevants)
+        if overwrite_data == True:
+            if method == "log_returns":
+                self.data = relevants.pct_change().apply(lambda x: np.log(1+x))
+        else:
+            return relevants
+
 
 
     def generate_random_portfolios(self, number_of_portfolios = 5000):
@@ -85,6 +95,9 @@ class efficientFrontier:
 
         return self.portfolios
 
+
+
+
         
 
 
@@ -97,13 +110,9 @@ class efficientFrontier:
 
 if __name__ == "__main__":
 
-    neo = efficientFrontier()
-    neo.set_tickers(['AAPL', 'TSLA', 'MSFT', 'ARE'])
+    neo = efficientFrontier(tickers=['AAPL', 'TSLA', 'MSFT', 'ARE'])
 
-    data = neo.get_data()
-
-    neo.attention()
-
+    data = neo.data
 
 
     print(data)
