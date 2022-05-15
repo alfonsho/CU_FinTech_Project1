@@ -106,17 +106,28 @@ class Agent:
 
         number_of_assets = len(self.tickers)
 
-        portfolios = pd.DataFrame(columns=self.keys)
+        
 
-        candidates = np.random.uniform(0, 1, (number_of_portfolios, number_of_assets))
-        normalized = (candidates.T / candidates.sum(axis=1)).T
+        portfolios = np.random.uniform(0, 1, (number_of_portfolios, number_of_assets))
+        sum_of_rows = portfolios.sum(axis=1)
+        normalized = portfolios / sum_of_rows[:, np.newaxis]
+
+        portfolios = pd.DataFrame(columns=self.tickers)
 
         for portfolio in normalized:
+
+
    
             portfolios = portfolios.append(self.F(portfolio), ignore_index=True)
 
-        portfolios.drop(portfolios[(portfolios[self.tickers].sum(axis=1) > 1)].index, inplace=True)
+        # portfolios.drop(portfolios[(portfolios[self.tickers].sum(axis=1) > 1)].index, inplace=True)
         self.portfolios = portfolios
+
+
+
+
+
+        
 
 
     def r(self, risk, epsilon=0.005):
