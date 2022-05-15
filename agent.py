@@ -195,6 +195,10 @@ class Agent:
         
         """
 
+        input_validation = ['low', "med", "high", None, ""]
+        if risk not in input_validation:
+            raise TypeError
+
         if risk == "low":
             risk = self.select_portfolio_by_risk(level=0, as_list=True)
 
@@ -265,6 +269,8 @@ def run(tickers, budget=100000, risk=None):
     neo.budget_allocation(budget, to_csv=True)
 
 
+
+
 def parse_argv(argv):
 
 
@@ -330,8 +336,6 @@ if __name__ == "__main__":
         run(budget=d['budget'], risk=d['risk'], tickers=d['tickers'])
 
 
-
-    # run(tickers, budget, risk)
 
 
 
