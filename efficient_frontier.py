@@ -5,13 +5,15 @@ from doggie import Doggie
 
 
 class efficientFrontier:
+    """
+        given a set of tickers, this explores the efficient frontier. 
+    """
 
     def __init__(self, tickers=None):
         self.tickers = tickers
-        
+        if self.tickers is not None:
+            self.get_data()
 
-    def set_tickers(self, tickers):
-        self.tickers = tickers
 
     def __repr__(self,):
         if self.tickers == None:
@@ -20,25 +22,49 @@ class efficientFrontier:
             return f"Efficient frontier for tickers {'+'.join(self.tickers)}."
 
 
-    def get_data(self):
+    def set_tickers(self, tickers):
+        self.tickers = tickers
+
+
+    def get_data(self,):
         """
-            Uses Doggie to Fetch data from 5 years ago until today. Using a Doggie. 
+            Uses Doggie to Fetch data from 5 years ago until today. 
         """
 
         if self.tickers is None:
             print("Please set some tickers using the agent.set_tickers(tickers) method")
             return None 
 
-        start = str(pd.Timestamp.now())[:10]
-        end = str(pd.Timestamp.now() - pd.Timedelta(365*5, 'days'))[:10]
+        end = str(pd.Timestamp.now())[:10]
+        start = str(pd.Timestamp.now() - pd.Timedelta(365*5, 'days'))[:10]
         
         doggo = Doggie()
 
-        doggo.fetch(tickers=self.tickers,
+        data = doggo.fetch(tickers=self.tickers,
                     timeframe="1D",
-                    start="2020-05-10",
-                    end="2022-05-10",
+                    start=start,
+                    end=end,
                     )
+
+        self.data = data
+
+
+
+    def attention(self, column="close"):
+        """
+        all the data fetched, wrangle it so it only gets the desired attributes per ticker. 
+        """
+
+        relevants = []
+
+        for ticker in self.tickers:
+            relevants.append(self.data[self.data['symbol'] == ticker][column])
+
+        relevants = pd.concat(relevants, axis=1)
+        relevants.columns = self.tickers
+
+        print(relevants)
+
 
     def generate_random_portfolios(self, number_of_portfolios = 5000):
         """
@@ -55,7 +81,9 @@ class efficientFrontier:
 
         normalized_portfolios = portfolios / sum_of_rows[:, np.newaxis]
 
-        self.portfolios = pd.DataFrame(normalized_portfolios, columns=tickers)
+        self.portfolios = pd.DataFrame(normalized_portfolios, columns=self.tickers)
+
+        return self.portfolios
 
         
 
@@ -72,15 +100,9 @@ if __name__ == "__main__":
     neo = efficientFrontier()
     neo.set_tickers(['AAPL', 'TSLA', 'MSFT', 'ARE'])
 
-    doggo = Doggie()
+    data = neo.get_data()
 
-    data = doggo.fetch(tickers=neo.tickers,
-    timeframe="1D",
-    start="2020-05-10",
-    end="2022-05-10",
-    )
-
-
+    neo.attention()
 
 
 
