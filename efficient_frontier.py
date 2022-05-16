@@ -1,10 +1,11 @@
-from tkinter import Y
 import numpy as np
 import pandas as pd
 import hvplot.pandas
 import hvplot
 
 from doggie import Doggie
+
+import time as t
 
 
 class efficientFrontier:
@@ -18,7 +19,7 @@ class efficientFrontier:
             self.get_data()
             self.attention() # wrangles data so it can be processed. 
             self.calculate_metrics() # calculates statistical metrics like covariance and correlation. 
-            self.generate_random_portfolios()
+            # self.generate_random_portfolios()
 
 
     def __repr__(self,):
@@ -92,13 +93,12 @@ class efficientFrontier:
     def calculate_correlation_matrix(self):
         self.corr = self.data.corr()
 
-
     def calculate_metrics(self,):
         self.calculate_covariance_matrix()
         self.calculate_correlation_matrix()
 
 
-    def generate_random_portfolios(self, number_of_portfolios = 10000):
+    def generate_random_portfolios(self, number_of_portfolios = 5000):
         """
             generates random portfolios
         """
@@ -136,7 +136,99 @@ class efficientFrontier:
                                                 title=" + ".join(self.tickers))
         hvplot.show(plot)
 
+
+    def validate(self, portfolio):
+        """
+            given a vector, it ensures no negative components
+            scales the vector s.t. it sums to one. 
+        """
+            
+        for i, weight in enumerate(portfolio):
+            if weight < 0:
+                portfolio[i] = 0 
+
+            
+        portfolio /= portfolio.sum()
+        return portfolio
+
         
+    def max_sharpe(self, method="gradient_ascent", return_path = False):
+        """
+            returns the max-sharpe portfolio for a collection of assets
+        """
+
+        # makes available: annualized
+        self.calculate_metrics()
+
+        # Generate 1 portfolio of even weights and calculate initial metrics. 
+        W = np.ones(len(self.tickers)) / len(self.tickers)
+        # W = np.random.uniform(0, 1, len(self.tickers)) 
+        W = self.validate(W)
+
+        var = W.T @ self.cov @ W
+        vol = np.sqrt(var) * np.sqrt(250)
+        portfolio_return = W @ self.annualized_individual_expected_return
+
+        S = []
+        S.append(portfolio_return / vol)
+
+        pct_chg = 1
+
+        for i in range(400):
+
+            # Forward pass (Compute sharpe ratio + relevant components)
+
+            var = W.T @ self.cov @ W
+            vol = np.sqrt(var) * np.sqrt(250)
+
+            portfolio_return = W @ self.annualized_individual_expected_return
+
+            S_i = portfolio_return / vol
+            print(f'Sharpe:\t{S_i}')
+
+            # evaluate gradients
+            # Volatility's component first: 
+            dvoldw = (np.sqrt(250) / np.sqrt(var)) * (W @ self.cov) 
+            dSdvol = -portfolio_return / vol**2 
+            # Chain rule
+            dSdw_vol = dSdvol * dvoldw
+
+            # Now Return component
+            dSdr = portfolio_return
+            drdw = self.annualized_individual_expected_return
+            # Chain rule
+            dSdw_ret = dSdr * drdw
+
+            # Join them 
+            gradS = 2*dSdw_ret + dSdw_vol
+
+
+            # take a step in the direction of gradient
+            eta = 0.001
+            W += eta * gradS
+
+            # Normalize
+            W = self.validate(W)
+
+            # evaluate for stopping condition
+            pct_chg = (S_i - S[-1]) / S[-1]
+            if pct_chg < 0:
+
+                self.W = W
+
+                # if return_path == True:
+                #     return S, W
+                # else:
+                #     return W
+            else:
+                S.append(S_i)
+
+        
+        return S, W
+
+
+            
+
 
 
 
@@ -149,13 +241,27 @@ class efficientFrontier:
 if __name__ == "__main__":
 
 
+    # random generation finds a max sharpe of 1.27 for this portfolio. 
+    neo = efficientFrontier(tickers=['MSFT', 'GLD', 'LLY', 'ARE', 'SPY', 'BND'])
 
-    neo = efficientFrontier(tickers=['MSFT', 'TSLA', 'AAPL', 'GLD', 'PFE'])
+    t_0 = t.time()
+    print("Starting Optimization")
+    print(neo.max_sharpe(return_path=True))
+    print(f"Found max sharpe.\nRunning time {t.time() - t_0}")
 
-    neo.generate_random_portfolios()
+    # neo.generate_random_portfolios()
 
-    # this is annualized covariance. 
-    print(neo.annualized_individual_expected_return)
+    # # this is annualized covariance. 
+    # print(neo.annualized_individual_expected_return)
+    # portfolio = neo.portfolios.tail(1)[neo.tickers]
+    # print(neo.cov)
 
-    neo.display_plot()
+    # print(2*portfolio@neo.cov)
+
+
+
+    
+    
+
+    # # neo.display_plot()
     # neo.display_plot()
