@@ -1,5 +1,9 @@
 
-        EXAMPLE USAGE: 
+ 
+    agent.py
+        known issues: The computation of volatility needs to be andjusted. 
+ 
+        EXAMPLE USAGE : 
 
         .ENV SETUP: 
         ----------
@@ -28,4 +32,26 @@
                 - A CSV of the selected portfolio allocation valued in USD according to the budget given. 
 
             if No risk level is provided, the code will run a Monte Carlo with even weights. 
+
+
         
+
+    efficient_frontier.py
+        This module has a better implementation of the return-volatility calculation. 
+        Also requires your alpaca credentials in a .env file. 
+
+        EXAMPLE USAGE : 
+
+            from efficient_frontier import efficientFrontier
+
+            # Fetches data by itself 
+            neo = efficientFrontier(tickers=['MSFT', 'GLD', 'LLY', 'ARE', 'SPY', 'BND'])
+
+            # This function generates 5000 of portfolios of the provided assets. 
+            # Returns the one with the highest sharpe ratio. Which is unlikely to be the
+            # actual very best. but it's pretty good. 
+            max_sharpe = neo.generate_random_portfolios()
+
+            # This plots the portfolios generated using hvplot in the volatility-return space
+            neo.display_plot()
+

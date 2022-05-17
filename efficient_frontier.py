@@ -125,7 +125,7 @@ class efficientFrontier:
         self.portfolios['sharpe_ratio'] = self.portfolios['return'] / self.portfolios['volatility']
 
         self.portfolios.sort_values('sharpe_ratio', inplace=True)
-        return self.portfolios
+        return self.portfolios.iloc[-1]
 
 
     def display_plot(self, ):
@@ -164,6 +164,8 @@ class efficientFrontier:
         # Generate 1 portfolio of even weights and calculate initial metrics. 
         # W = np.ones(len(self.tickers)) / len(self.tickers)
         W = np.random.uniform(0, 1, len(self.tickers)) 
+
+        W = np.array([0.283, 0.278, 0.261, 3.36e-2, 1.1e-2, 0.133])
         W = self.validate(W)
 
         var = W.T @ self.cov @ W
@@ -173,7 +175,7 @@ class efficientFrontier:
         S = []
         S.append(portfolio_return / vol)
 
-        pct_chg = 100
+        pct_chg = 10000
 
         for i in range(4000):
 
@@ -216,8 +218,8 @@ class efficientFrontier:
 
             # evaluate for stopping condition
             pct_chg = (S_i - S[-1]) / S[-1]
-            print(pct_chg)
-            if pct_chg < 0:
+            # print(S_i)
+            if pct_chg <= -0.001:
                 print("is this running?")
 
                 self.W = W
@@ -247,15 +249,17 @@ class efficientFrontier:
 if __name__ == "__main__":
 
 
-    # random generation finds a max sharpe of 1.23 for this portfolio. 
+    # random generation finds a max sharpe of 1.25 for this portfolio. 
     neo = efficientFrontier(tickers=['MSFT', 'GLD', 'LLY', 'ARE', 'SPY', 'BND'])
 
-    t_0 = t.time()
-    print("Starting Optimization")
-    print(neo.max_sharpe(return_path=True))
-    print(f"Found max sharpe.\nRunning time {t.time() - t_0}")
+    # t_0 = t.time()
+    # print("Starting Optimization")
+    # print(neo.max_sharpe(return_path=True))
+    # print(f"Found max sharpe.\nRunning time {t.time() - t_0}")
 
-    # neo.generate_random_portfolios()
+    t_0 = t.time()
+    print(neo.generate_random_portfolios())
+    print(f"Found max sharpe.\nRunning time {t.time() - t_0}")
 
     # # this is annualized covariance. 
     # print(neo.annualized_individual_expected_return)
@@ -270,4 +274,4 @@ if __name__ == "__main__":
     
 
     # neo.display_plot()
-    # neo.display_plot()
+    neo.display_plot()
