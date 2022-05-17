@@ -162,8 +162,8 @@ class efficientFrontier:
         self.calculate_metrics()
 
         # Generate 1 portfolio of even weights and calculate initial metrics. 
-        # W = np.ones(len(self.tickers)) / len(self.tickers)
-        W = np.random.uniform(0, 1, len(self.tickers)) 
+        W = np.ones(len(self.tickers)) / len(self.tickers)
+        # W = np.random.uniform(0, 1, len(self.tickers)) 
         W = self.validate(W)
 
         var = W.T @ self.cov @ W
@@ -175,7 +175,7 @@ class efficientFrontier:
 
         pct_chg = 1
 
-        for i in range(40):
+        for i in range(4000):
 
             # Forward pass (Compute sharpe ratio + relevant components)
 
@@ -189,23 +189,26 @@ class efficientFrontier:
 
             # evaluate gradients
             # Volatility's component first: 
-            dvoldw = (np.sqrt(250) / np.sqrt(var)) * (W @ self.cov) 
-            dSdvol = -portfolio_return / vol**2 
-            # Chain rule
-            dSdw_vol = dSdvol * dvoldw
+            # dvoldw = (np.sqrt(250) / np.sqrt(var)) * (W @ self.cov) 
+            # dSdvol = -portfolio_return / vol**2 
+            # # Chain rule
+            # dSdw_vol = dSdvol * dvoldw
 
-            # Now Return component
-            dSdr = portfolio_return
-            drdw = self.annualized_individual_expected_return
-            # Chain rule
-            dSdw_ret = dSdr * drdw
+            # # Now Return component
+            # dSdr = portfolio_return
+            # drdw = self.annualized_individual_expected_return
+            # # Chain rule
+            # dSdw_ret = dSdr * drdw
 
-            # Join them 
-            gradS = dSdw_ret + dSdw_vol
+            # # Join them 
+            # gradS = dSdw_ret + dSdw_vol
+
+
+            gradS = (self.annualized_individual_expected_return.T - W@self.cov)
 
 
             # take a step in the direction of gradient
-            eta = 0.03
+            eta = 0.1
             W += eta * gradS
 
             # Normalize
@@ -213,7 +216,7 @@ class efficientFrontier:
 
             # evaluate for stopping condition
             pct_chg = (S_i - S[-1]) / S[-1]
-            print(pct_chg)
+            print(S[-1])
             if pct_chg < 0:
                 print("is this running?")
 
@@ -244,8 +247,8 @@ class efficientFrontier:
 if __name__ == "__main__":
 
 
-    # random generation finds a max sharpe of 1.27 for this portfolio. 
-    neo = efficientFrontier(tickers=['MSFT', 'GLD', 'LLY', 'ARE', 'SPY'])
+    # random generation finds a max sharpe of 1.23 for this portfolio. 
+    neo = efficientFrontier(tickers=['MSFT', 'GLD', 'LLY', 'ARE', 'SPY', 'BND'])
 
     t_0 = t.time()
     print("Starting Optimization")
@@ -266,5 +269,5 @@ if __name__ == "__main__":
     
     
 
-    # # neo.display_plot()
+    # neo.display_plot()
     # neo.display_plot()
