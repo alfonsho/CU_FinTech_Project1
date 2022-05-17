@@ -31,6 +31,9 @@ class efficientFrontier:
 
     def set_tickers(self, tickers):
         self.tickers = tickers
+        self.get_data()
+        self.attention()
+        self.calculate_metrics()
 
 
     def get_data(self,):
@@ -234,44 +237,41 @@ class efficientFrontier:
         
 
 
+    def random_tickers(self, n, set_tickers=True):
+        """
+            selects random tickers from all_tickers.csv
+        """
+        tickers = pd.read_csv("all_tickers.csv", index_col="Unnamed: 0")
+        choices = np.random.choice(tickers['symbol'], n)
 
-            
+        if set_tickers == True:
+            self.set_tickers(choices)
+        return choices
 
 
 
 
+    def get_ticker_info(self, tickers):
+        alltickers = pd.read_csv('all_tickers.csv', index_col='symbol')
 
+        alltickers.drop("Unnamed: 0", axis=1, inplace=True)
 
+        df = alltickers.loc[tickers]
 
+        return df
+    
 
 
 
 if __name__ == "__main__":
 
+    portfolio = efficientFrontier()
 
-    # random generation finds a max sharpe of 1.25 for this portfolio. 
-    neo = efficientFrontier(tickers=['MSFT', 'GLD', 'LLY', 'ARE', 'SPY', 'BND'])
-
-    # t_0 = t.time()
-    # print("Starting Optimization")
-    # print(neo.max_sharpe(return_path=True))
-    # print(f"Found max sharpe.\nRunning time {t.time() - t_0}")
-
-    t_0 = t.time()
-    print(neo.generate_random_portfolios())
-    print(f"Found max sharpe.\nRunning time {t.time() - t_0}")
-
-    # # this is annualized covariance. 
-    # print(neo.annualized_individual_expected_return)
-    # portfolio = neo.portfolios.tail(1)[neo.tickers]
-    # print(neo.cov)
-
-    # print(2*portfolio@neo.cov)
-
+    time = t.time()
+    tickers = portfolio.random_tickers(7)
+    print(get_ticker_info(tickers))
+    print(t.time()-time)
 
 
     
-    
 
-    # neo.display_plot()
-    neo.display_plot()
