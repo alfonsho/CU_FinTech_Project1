@@ -162,8 +162,8 @@ class efficientFrontier:
         self.calculate_metrics()
 
         # Generate 1 portfolio of even weights and calculate initial metrics. 
-        W = np.ones(len(self.tickers)) / len(self.tickers)
-        # W = np.random.uniform(0, 1, len(self.tickers)) 
+        # W = np.ones(len(self.tickers)) / len(self.tickers)
+        W = np.random.uniform(0, 1, len(self.tickers)) 
         W = self.validate(W)
 
         var = W.T @ self.cov @ W
@@ -173,7 +173,7 @@ class efficientFrontier:
         S = []
         S.append(portfolio_return / vol)
 
-        pct_chg = 1
+        pct_chg = 100
 
         for i in range(4000):
 
@@ -204,11 +204,11 @@ class efficientFrontier:
             # gradS = dSdw_ret + dSdw_vol
 
 
-            gradS = (self.annualized_individual_expected_return.T - W@self.cov)
+            gradS = (2*self.annualized_individual_expected_return.T - W@self.cov)
 
 
             # take a step in the direction of gradient
-            eta = 0.1
+            eta = 0.3
             W += eta * gradS
 
             # Normalize
@@ -216,7 +216,7 @@ class efficientFrontier:
 
             # evaluate for stopping condition
             pct_chg = (S_i - S[-1]) / S[-1]
-            print(S[-1])
+            print(pct_chg)
             if pct_chg < 0:
                 print("is this running?")
 
