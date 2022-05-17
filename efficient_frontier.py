@@ -155,14 +155,15 @@ class efficientFrontier:
     def max_sharpe(self, method="gradient_ascent", return_path = False):
         """
             returns the max-sharpe portfolio for a collection of assets
+            does not work, just yet. 
         """
 
         # makes available: annualized
         self.calculate_metrics()
 
         # Generate 1 portfolio of even weights and calculate initial metrics. 
-        W = np.ones(len(self.tickers)) / len(self.tickers)
-        # W = np.random.uniform(0, 1, len(self.tickers)) 
+        # W = np.ones(len(self.tickers)) / len(self.tickers)
+        W = np.random.uniform(0, 1, len(self.tickers)) 
         W = self.validate(W)
 
         var = W.T @ self.cov @ W
@@ -174,7 +175,7 @@ class efficientFrontier:
 
         pct_chg = 1
 
-        for i in range(400):
+        for i in range(40):
 
             # Forward pass (Compute sharpe ratio + relevant components)
 
@@ -184,7 +185,7 @@ class efficientFrontier:
             portfolio_return = W @ self.annualized_individual_expected_return
 
             S_i = portfolio_return / vol
-            print(f'Sharpe:\t{S_i}')
+
 
             # evaluate gradients
             # Volatility's component first: 
@@ -200,11 +201,11 @@ class efficientFrontier:
             dSdw_ret = dSdr * drdw
 
             # Join them 
-            gradS = 2*dSdw_ret + dSdw_vol
+            gradS = dSdw_ret + dSdw_vol
 
 
             # take a step in the direction of gradient
-            eta = 0.001
+            eta = 0.03
             W += eta * gradS
 
             # Normalize
@@ -212,19 +213,21 @@ class efficientFrontier:
 
             # evaluate for stopping condition
             pct_chg = (S_i - S[-1]) / S[-1]
+            print(pct_chg)
             if pct_chg < 0:
+                print("is this running?")
 
                 self.W = W
 
-                # if return_path == True:
-                #     return S, W
-                # else:
-                #     return W
+                if return_path == True:
+                    return S, W
+                else:
+                    return W
             else:
                 S.append(S_i)
 
         
-        return S, W
+
 
 
             
@@ -242,7 +245,7 @@ if __name__ == "__main__":
 
 
     # random generation finds a max sharpe of 1.27 for this portfolio. 
-    neo = efficientFrontier(tickers=['MSFT', 'GLD', 'LLY', 'ARE', 'SPY', 'BND'])
+    neo = efficientFrontier(tickers=['MSFT', 'GLD', 'LLY', 'ARE', 'SPY'])
 
     t_0 = t.time()
     print("Starting Optimization")
