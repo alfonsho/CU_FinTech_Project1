@@ -59,7 +59,6 @@ class efficientFrontier:
         self.data = data
 
 
-
     def attention(self, column="close", overwrite_data=True, method="log_returns"):
         """
         all the data fetched, wrangle it so it only gets the desired attributes per ticker. 
@@ -93,8 +92,10 @@ class efficientFrontier:
         """
         self.cov = self.data.cov()
 
+
     def calculate_correlation_matrix(self):
         self.corr = self.data.corr()
+
 
     def calculate_metrics(self,):
         self.calculate_covariance_matrix()
@@ -106,9 +107,9 @@ class efficientFrontier:
             generates random portfolios
         """
 
-        if self.tickers == None:
-            print("Please feed me some tickers")
-            return None
+        # if self.tickers == None:
+        #     print("Please feed me some tickers")
+        #     return None
 
         portfolios = np.random.uniform(0, 1, (number_of_portfolios, len(self.tickers)))
 
@@ -234,8 +235,6 @@ class efficientFrontier:
             else:
                 S.append(S_i)
 
-        
-
 
     def random_tickers(self, n, set_tickers=True):
         """
@@ -249,8 +248,6 @@ class efficientFrontier:
         return choices
 
 
-
-
     def get_ticker_info(self, tickers):
         alltickers = pd.read_csv('all_tickers.csv', index_col='symbol')
 
@@ -258,9 +255,36 @@ class efficientFrontier:
 
         df = alltickers.loc[tickers]
 
+        df["ExpectedReturn"] = self.annualized_individual_expected_return
+
         return df
+
+    def pretty_print(self):
+        print("\n### TICKER INFORMATION\n")
+        print(self.get_ticker_info(self.tickers))
+
+
+        print("\n\n# COVARIANCE MATRIX\n")
+        print(self.cov)
+
+        print("\n\n# OPTIMAL POSITION\n")
+        max = self.generate_random_portfolios()
+        print(max)
     
 
+    
+
+
+# TODO: ADD FUNCTIONALITY TO "WATCH" A PORTFOLIO. 
+#       BY "INVESTING" $100,000.00 IN IT. OR A SET AMOUNT
+
+# TODO: Add fucntionality to partition capital into different 
+#       portfolios. Say, I have 2,000,000.00 and 5 isolated portfolios
+
+# TODO: Add presentation capabilities. a pretty print if you will
+#       for apartifular portfolio present the info on the tickers
+#       followed by the portfolio covariance matrix and finally
+#       the portfolio itself. 
 
 
 if __name__ == "__main__":
@@ -269,7 +293,8 @@ if __name__ == "__main__":
 
     time = t.time()
     tickers = portfolio.random_tickers(7)
-    print(get_ticker_info(tickers))
+    portfolio.set_tickers(tickers)
+    portfolio.pretty_print()
     print(t.time()-time)
 
 

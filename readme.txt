@@ -55,3 +55,48 @@
             # This plots the portfolios generated using hvplot in the volatility-return space
             neo.display_plot()
 
+
+
+        ** New!! 
+        efficientFrontier.pretty_print()
+
+            produces something like this: 
+
+                ### TICKER INFORMATION
+
+                                        company_name                                  industry    market_cap  ExpectedReturn
+                symbol
+                EDUC         Educational Development                              Distributors  4.192000e+07       -0.040854
+                HRMY    Harmony Biosciences Holdings                             Biotechnology  2.240000e+09        0.081088
+                EZGO               EZGO Technologies                     Recreational Vehicles  1.213000e+07       -0.412752
+                SSNT          SilverSun Technologies                                  Software  1.289000e+07        0.043114
+                FSRX          FinServ Acquisition II                        Blank Check / SPAC  3.757200e+08        0.006154
+                MNST                Monster Beverage                                 Beverages  4.708000e+10        0.098330
+                OIIM           O2Micro International  Semiconductors & Semiconductor Equipment  8.887000e+07        0.697005
+
+
+                # COVARIANCE MATRIX
+
+                        EDUC      HRMY          EZGO      SSNT          FSRX      MNST      OIIM
+                EDUC  0.001596  0.000136  2.361740e-04  0.000056  2.777730e-06  0.000129  0.000176
+                HRMY  0.000136  0.001390  3.680233e-04  0.000171  1.144350e-05  0.000098  0.000142
+                EZGO  0.000236  0.000368  4.243398e-03  0.001016 -7.936633e-07  0.000131  0.000763
+                SSNT  0.000056  0.000171  1.016368e-03  0.002932 -2.891361e-05  0.000055  0.000065
+                FSRX  0.000003  0.000011 -7.936633e-07 -0.000029  2.886448e-05 -0.000001  0.000003
+                MNST  0.000129  0.000098  1.311797e-04  0.000055 -1.286485e-06  0.000317  0.000110
+                OIIM  0.000176  0.000142  7.625784e-04  0.000065  3.322353e-06  0.000110  0.001561
+
+
+                # OPTIMAL POSITION
+
+                EDUC            0.116820
+                HRMY            0.033802
+                EZGO            0.005130
+                SSNT            0.010683
+                FSRX            0.290296
+                MNST            0.085299
+                OIIM            0.457971
+                volatility      0.315556
+                return          0.325694
+                sharpe_ratio    1.032128
+                Name: 1922, dtype: float64
